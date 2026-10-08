@@ -1,0 +1,134 @@
+#include <iostream>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <cmath>
+
+const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"}\0";
+const char* fragmentShaderSource = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(0.0784f, 0.3843f, 0.9922f, 0.10f);\n"
+"}\0";
+
+int main() {
+	//initialize glfw
+	glfwInit();
+	//Give the glfw Window hints to use OpenGL 3.3 and the core version of OpenGL
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	GLfloat vertices[] = {
+	-0.5f, -0.5f * float(sqrt(3.0)/3.0), 0.0f,
+	 0.5f, -0.5f * float(sqrt(3.0)/3.0), 0.0f,
+	 0.0f, 0.5f * float(sqrt(3.0)/3.0) ,0.0f,
+	-0.5f/2, -0.5f*float(sqrt(3.0)/6), 0.0f,
+	 0.5f/2 , -0.5f*float(sqrt(3.0)/6), 0.0f,
+	 0.0f, 0.5f * float(sqrt(3.0) / 6), 0.0f
+	};
+
+	GLuint indices[] = {
+		0 , 3 , 5,
+		3 , 2 , 4,
+		5 , 4 , 1
+	};
+
+	//creates a glfw window which is name OpenGL and has a width and height of 800x800 pixels and is stored in the window variable and fullscreen is set to NULL or disabled
+	GLFWwindow* window = glfwCreateWindow(800,800, "OpenGL", NULL, NULL);
+	if (window == NULL) {
+		std::cout << "Failed to create Window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	//sets the context of the window we just created to be the current context of openGL so it renders to window and not some other window that may be open
+	glfwMakeContextCurrent(window);
+	//loads the OpenGL function pointers so we can use OpenGL functions
+	gladLoadGL();
+
+	//sets the viewport of the window to be the same size as the window so that it renders to the entire window and not just a portion of it
+	glViewport(0, 0, 800, 800);
+
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	glCompileShader(vertexShader);
+
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glCompileShader(fragmentShader);
+
+	GLuint shaderProgram = glCreateProgram();
+
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	GLuint VAO,VBO,EBO;
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+
+	//We Bind the VBO to the buffer and specify that it is a GL_ARRAY_BUFFER which means it is a buffer that will be used to store vertex data 
+	//and we are binding it to the VBO variable so we can use it later
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//In this line we are WRITING the vertices data into the GL_ARRAY_BUFFER slot in the graphics card memory that we just bound the VBO to and 
+	//we are telling it how much data we are writing, what data we are writing, and how we are going to use that data, 
+	//GL_STATIC_DRAW means we are going to use this data a lot and not change it much, 
+	//GL_DYNAMIC_DRAW means we are going to use this data a lot and change it a lot, 
+	//and GL_STREAM_DRAW means we are going to use this data a lot and change it every frame
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	
+	//We Bind the EBO to the buffer and specify that it is a GL_ELEMENT_ARRAY_BUFFER which means it is a buffer that will be used to store index data
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	//In this line we basically adding the VBO to the VAO and VAO is the array the stores all the configurations of multiple different VBOs so we can switch when we want
+	//But we are only using one VBO in this case so we are just adding the VBO to the VAO and telling it how to interpret the data in the VBO and how to use it
+	//The first value in glVertexAttribPointer is the index of the vertex attribute we are configuring, in this case 0 because we only have one vertex attribute, the position
+	//The second value is the size of the vertex attribute, in this case 3 because we have 3 values for the position, x, y, and z
+	//The third value is the type of the vertex attribute, in this case GL_FLOAT because we are using floats for the position
+	//The fourth value is whether or not to normalize the vertex attribute, in this case GL_FALSE because we don't want to normalize the position
+	//The fifth value is the stride of the vertex attribute, in this case 3 * sizeof(float) because we have 3 values for the position and each value is a float
+	//The VBO's arent really connected to the VAO, the VBO is stored in the Buffer slot of graphics card memory and VAO just stores the data that the VBO would have but not the literal VBO variable which is why we are storing vertices and etc in VAO and not directly VBO
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	//This function clears the color buffer for the graphics card and sets the color to be used when clearing the color buffer to the color we want and stores it in a variable
+	glClearColor(0.07f,0.13f,0.17f,1.0f);
+	//glClear uses this variable to clear and set the backbuffers color to this variable
+	glClear(GL_COLOR_BUFFER_BIT);
+	//glfwSwapBuffers swaps the backbuffer with the frontbuffer so that the color we just set is displayed on the window and not just in the backbuffer
+	glfwSwapBuffers(window);
+
+	while(!glfwWindowShouldClose(window)) {
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		glfwSwapBuffers(window);
+		//Get and take care of all GLFW events, such as keyboard and mouse input, window resizing, etc.
+		glfwPollEvents();
+	}
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	//destroy the window and terminate glfw to free up resources and memory
+	glfwDestroyWindow(window);	
+	glfwTerminate();
+	return 0;
+}
