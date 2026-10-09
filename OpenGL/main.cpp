@@ -2,21 +2,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include "Shaders.h"
+#include "VAO.h"
+#include "VBO.h"
+#include "EBO.h"
 
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(0.0784f, 0.3843f, 0.9922f, 0.10f);\n"
-"}\0";
-
-int main() {
+void main() {
 	//initialize glfw
 	glfwInit();
 	//Give the glfw Window hints to use OpenGL 3.3 and the core version of OpenGL
@@ -25,18 +16,29 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLfloat vertices[] = {
-	-0.5f, -0.5f * float(sqrt(3.0)/3.0), 0.0f,
-	 0.5f, -0.5f * float(sqrt(3.0)/3.0), 0.0f,
-	 0.0f, 0.5f * float(sqrt(3.0)/3.0) ,0.0f,
-	-0.5f/2, -0.5f*float(sqrt(3.0)/6), 0.0f,
-	 0.5f/2 , -0.5f*float(sqrt(3.0)/6), 0.0f,
-	 0.0f, 0.5f * float(sqrt(3.0) / 6), 0.0f
+		// 0: Bottom-left outer vertex
+		-0.5f, -0.5f * float(sqrt(3)) / 3.0f, 0.0f,
+
+		// 1: Bottom-right outer vertex
+		 0.5f, -0.5f * float(sqrt(3)) / 3.0f, 0.0f,
+
+		 // 2: Top outer vertex
+		  0.0f,  0.5f * float(sqrt(3)) / 3.0f, 0.0f,
+
+		  // 3: Midpoint on left edge (between 0 and 2)
+		  -0.25f, 0.0f, 0.0f,
+
+		  // 4: Midpoint on bottom edge (between 0 and 1)
+		   0.0f, -0.5f * float(sqrt(3)) / 3.0f, 0.0f,
+
+		   // 5: Midpoint on right edge (between 2 and 1)
+			0.25f, 0.0f, 0.0f
 	};
 
 	GLuint indices[] = {
-		0 , 3 , 5,
-		3 , 2 , 4,
-		5 , 4 , 1
+		0, 3, 4,  // Bottom-Left Triangle
+		3, 2, 5,  // Top Triangle
+		4, 5, 1   // Bottom-Right Triangle
 	};
 
 	//creates a glfw window which is name OpenGL and has a width and height of 800x800 pixels and is stored in the window variable and fullscreen is set to NULL or disabled
@@ -44,7 +46,7 @@ int main() {
 	if (window == NULL) {
 		std::cout << "Failed to create Window" << std::endl;
 		glfwTerminate();
-		return -1;
+		return;
 	}
 	//sets the context of the window we just created to be the current context of openGL so it renders to window and not some other window that may be open
 	glfwMakeContextCurrent(window);
@@ -54,34 +56,22 @@ int main() {
 	//sets the viewport of the window to be the same size as the window so that it renders to the entire window and not just a portion of it
 	glViewport(0, 0, 800, 800);
 
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
+	Shader ShaderProgram("default.vert.glsl", "default.frag.glsl");
 
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
+	VAO VAO1;
+	VAO1.bind();
+	VBO VBO1(vertices, sizeof(vertices));
+	EBO EBO1(indices, sizeof(indices));
+	
+	VAO1.LinkVBO(VBO1, 0);
+	VAO1.unbind();
+	VBO1.Unbind();
+	EBO1.unbind();
 
-	GLuint shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	GLuint VAO,VBO,EBO;
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
 
 	//We Bind the VBO to the buffer and specify that it is a GL_ARRAY_BUFFER which means it is a buffer that will be used to store vertex data 
 	//and we are binding it to the VBO variable so we can use it later
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
 	//In this line we are WRITING the vertices data into the GL_ARRAY_BUFFER slot in the graphics card memory that we just bound the VBO to and 
 	//we are telling it how much data we are writing, what data we are writing, and how we are going to use that data, 
 	//GL_STATIC_DRAW means we are going to use this data a lot and not change it much, 
@@ -90,7 +80,6 @@ int main() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	
 	//We Bind the EBO to the buffer and specify that it is a GL_ELEMENT_ARRAY_BUFFER which means it is a buffer that will be used to store index data
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	//In this line we basically adding the VBO to the VAO and VAO is the array the stores all the configurations of multiple different VBOs so we can switch when we want
@@ -117,18 +106,18 @@ int main() {
 	while(!glfwWindowShouldClose(window)) {
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
+		ShaderProgram.Activate();
+		VAO1.bind();
 		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
 		//Get and take care of all GLFW events, such as keyboard and mouse input, window resizing, etc.
 		glfwPollEvents();
 	}
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+	VAO1.Delete();;
+	VBO1.Delete();
+	EBO1.deleteBuffer();
 	//destroy the window and terminate glfw to free up resources and memory
 	glfwDestroyWindow(window);	
 	glfwTerminate();
-	return 0;
+
 }

@@ -1,3 +1,15 @@
+# Visual Studio hidden workspace & cache directory
+.vs/
+
+# Build outputs & executables
+x64/
+Debug/
+Release/
+*.user
+*.suo
+*.VC.db
+*.opendb
+
 # Prerequisites
 *.d
 
