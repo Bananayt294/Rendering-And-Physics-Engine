@@ -1,5 +1,4 @@
-#ifndef GLAD_GL_VERSION_1_2
-#define GLAD_GL_VERSION_1_2 
+#pragma once
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -16,4 +15,3 @@ public:
 	void Delete();
 };
 
-#endif

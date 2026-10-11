@@ -1,5 +1,4 @@
-#ifndef Shaders_h
-#define Shaders_h
+#pragma once
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -17,5 +16,3 @@ public:
 	void Activate();
 	void Delete();
 };
-
-#endif

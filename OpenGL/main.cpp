@@ -10,10 +10,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
 
-
-const unsigned int width = 800;
-const unsigned int height = 800;
+const unsigned int width = 900;
+const unsigned int height = 900;
 
 
 int main() {
@@ -76,9 +76,6 @@ int main() {
 	VBO1.Unbind();
 	EBO1.unbind();
 
-	GLuint uniID = glGetUniformLocation(ShaderProgram.ID, "scale");
-
-
 	//GLuint DistanceID = glGetUniformLocation(ShaderProgram.ID, "distance");
 	//GLuint TimeID = glGetUniformLocation(ShaderProgram.ID, "time");
 	//GLuint speedID = glGetUniformLocation(ShaderProgram.ID, "speed");
@@ -122,40 +119,18 @@ int main() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	GLuint tex0Uni = glGetUniformLocation(ShaderProgram.ID, "tex0");
-	ShaderProgram.Activate();
-	glUniform1i(tex0Uni, 0);
-
-	float rotation = 0.0f;
-	double prevTime = glfwGetTime();
-
+	
 	glEnable(GL_DEPTH_TEST);
+	
+	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
 	while(!glfwWindowShouldClose(window)) {
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		ShaderProgram.Activate();
-
-		double crntTime = glfwGetTime();
-		float deltaTime = static_cast<float>(crntTime - prevTime);
-		prevTime = crntTime;
-
-		rotation += 45.0f * deltaTime;
-
-		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
-
-		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-		view = glm::translate(view, glm::vec3(0.0f, 0.2f, -2.5f));
-		projection = glm::perspective(glm::radians(45.0f), (float)width / (float) height, 0.1f, 100.0f); 
-		//glUniform1f(uniID, 1.0f);
-
-		int modelLoc = glGetUniformLocation(ShaderProgram.ID, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		int viewLoc = glGetUniformLocation(ShaderProgram.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		int ProjLoc = glGetUniformLocation(ShaderProgram.ID, "projection");
-		glUniformMatrix4fv(ProjLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		camera.Inputs(window);
+		glUniform1i(tex0Uni, 0);
+		camera.matrix(45.0f, 0.1f, 100.0f, ShaderProgram, "camMatrix");
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);

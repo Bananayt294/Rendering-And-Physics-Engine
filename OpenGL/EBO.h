@@ -1,5 +1,4 @@
-#ifndef VertexBuffer_h
-#define VertexBuffer_h
+#pragma once
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -14,4 +13,3 @@ public:
 	void deleteBuffer();
 };
 
-#endif
