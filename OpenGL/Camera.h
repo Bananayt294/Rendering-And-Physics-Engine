@@ -20,8 +20,8 @@ class Camera {
 		int width;
 		int height;
 
-		float speed = 0.0050f;
-		float sensitivity = 100.0f;	
+		float speed = 0.0050;
+		float sensitivity = 75.0f;
 
 		Camera(int width, int height, glm::vec3 Position);
 

@@ -25,14 +25,13 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLfloat vertices[] = {
-		// COORDINATES					//	COLORS (RGB)		// TEX COORDS
-		// 0: Bottom-left
-		-0.5f, -0.5f,  0.5f,  1, 0, 0,  0, 0, // 0
-		-0.5f, -0.5f, -0.5f,  0, 1, 0,  0, 5, // 1
-		 0.5f, -0.5f, -0.5f,  0, 1, 0,  5, 5, // 2
-		 0.5f, -0.5f,  0.5f,  1, 1, 1,  5, 0, // 3
+		// COORDINATES		//COLORS (RGB)	//TEX COORDS
+		-0.5f, -0.5f,  0.5f,  1, 0, 0,		0, 0, // 0
+		-0.5f, -0.5f, -0.5f,  0, 1, 0,		0, 5, // 1
+		 0.5f, -0.5f, -0.5f,  0, 1, 0,		5, 5, // 2
+		 0.5f, -0.5f,  0.5f,  1, 1, 1,		5, 0, // 3
 
-		 0.0f,  0.5f,  0.0f,  1, 1, 1,  2.5f, 2.5f
+		 0.0f,  0.5f,  0.0f,  1, 1, 1,		2.5f, 2.5f
 	};
 
 	GLuint indices[] = {
@@ -76,9 +75,6 @@ int main() {
 	VBO1.Unbind();
 	EBO1.unbind();
 
-	//GLuint DistanceID = glGetUniformLocation(ShaderProgram.ID, "distance");
-	//GLuint TimeID = glGetUniformLocation(ShaderProgram.ID, "time");
-	//GLuint speedID = glGetUniformLocation(ShaderProgram.ID, "speed");
 	// VBO and EBO data uploaded by their constructors; VAO/EBO association created while VAO was bound.
 	// Vertex attributes configured above with VAO1.LinkAttrib. No extra glBufferData calls needed here.
 	// Safety: ensure no accidental global buffers are bound.
@@ -125,22 +121,33 @@ int main() {
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
 	while(!glfwWindowShouldClose(window)) {
+		//Clear the color and THEN assigns it to this
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		//Clears Where the Buffer and Color will be stored ot make sure nothing from the past is left here
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Activates the ShaderProgram that actually contains all the rendering for our shader
 		ShaderProgram.Activate();
+		//Takes Inputs From the Window
 		camera.Inputs(window);
+		//Sends Texture0 Which is the texture we wanna render to default.vert.glsl
 		glUniform1i(tex0Uni, 0);
+		//Creates The camera Matrix. Basically X,Y,Z starting coords for the camera
 		camera.matrix(45.0f, 0.1f, 100.0f, ShaderProgram, "camMatrix");
-
+		//Activates Enables A Slot To Store The Texture In
 		glActiveTexture(GL_TEXTURE0);
+		//A Random Set of Initialised Bytes takes that space As the Variable "texture"
 		glBindTexture(GL_TEXTURE_2D, texture);
+		//When VAO1 is bound then all the configs stored in them go to their designated slots in VBO goes to VBO slot,
+		//EBO goes to EBO slot AND The Texture config overwrites the waste data in "texture" variable with its bytes and gets rendered
 		VAO1.bind();
+		//Draws Triangles
 		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
+		//swaps the back buffer where everything happened to the front buffer where it displays.
 		glfwSwapBuffers(window);
 		//Get and take care of all GLFW events, such as keyboard and mouse input, window resizing, etc.
 		glfwPollEvents();
 	}
-	VAO1.Delete();;
+	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.deleteBuffer();
 	glDeleteTextures(1, &texture);
