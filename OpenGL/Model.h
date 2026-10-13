@@ -13,11 +13,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include <vector>
+#include <memory>
+#include <string>
 
 class Model {
 private:
-	
-
+	std::string vertexShaderPath;
+	std::string fragmentShaderPath;
 	std::unique_ptr<Shader> ShaderProgram;
 	std::unique_ptr<Camera> camera;
 	std::unique_ptr<VAO> VAO1;
@@ -26,17 +28,15 @@ private:
 
 	GLuint texture = 0;
 	GLint tex0Uni = -1;
+	GLint modelUni = -1;
 protected:
 	int vertexCount;
 	int indexCount;
 	std::vector<GLfloat> vertexData;
 	std::vector<GLuint> indexData;
 	std::vector<GLfloat> textureCoords;
-	glm::vec3* normalData;
+	glm::vec3* normalData = nullptr;
 	glm::mat4 ModelMatrix;
-	Shader shader;
-
-
 public:
 	GLFWwindow* window = nullptr;
 	Model(
@@ -70,7 +70,6 @@ public:
 	GLuint TextureObjectID;
 	bool shouldClose = false;
 
-	void setShader(Shader Shader);
 	void setModelMatrix(glm::mat4 ModelMatrix);
 	void GenerateSphere(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices, float radius, int resolution);
 	void init();

@@ -15,13 +15,14 @@ Model::Model(
 	const char* vertexPath,       // Pass paths instead of a pre-built Shader object
 	const char* fragmentPath
 )
-	: vertexCount(vertexCount),
+    : vertexCount(vertexCount),
 	indexCount(indexCount),
 	vertexData(std::move(incomingVertices)),   // Efficiently takes full ownership
 	indexData(std::move(incomingIndices)),
 	textureCoords(std::move(incomingTexCoords)),
 	ModelMatrix(incomingModelMatrix),
-	shader(vertexPath, fragmentPath) {
+	vertexShaderPath(vertexPath),
+    fragmentShaderPath(fragmentPath) {
 };         // Safely constructs the GPU program immediately
 
 
@@ -67,61 +68,59 @@ glm::mat4 Model::GetModelMatrix() {
 	return this->ModelMatrix;
 }
 
-void Model::setShader(Shader Shader) {
-	this->shader = Shader;
-};
+
 
 void Model::setModelMatrix(glm::mat4 ModelMatrix) {
 	this->ModelMatrix = ModelMatrix;
 };
 
-void GenerateSphere(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices, float radius, int resolution) {
-	vertices.clear();
-	indices.clear();
+void Model::GenerateSphere(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices, float radius, int resolution) {
+    vertices.clear();
+    indices.clear();
 
-	for (int lat = 0; lat <= resolution; lat++) {
-		float phi = glm::pi<float>() * lat / resolution;
+    for (int lat = 0; lat <= resolution; lat++) {
+        float phi = glm::pi<float>() * lat / resolution;
 
-		for (int lon = 0; lon <= resolution; lon++) {
-			float theta = glm::two_pi<float>() * lon / resolution;
+        for (int lon = 0; lon <= resolution; lon++) {
+            float theta = glm::two_pi<float>() * lon / resolution;
 
-			// Position
-			float x = radius * std::sin(phi) * std::cos(theta);
-			float y = radius * std::cos(phi);
-			float z = radius * std::sin(phi) * std::sin(theta);
+            // Position
+            float x = radius * std::sin(phi) * std::cos(theta);
+            float y = radius * std::cos(phi);
+            float z = radius * std::sin(phi) * std::sin(theta);
 
-			// Color (RGB)
-			float r = 1.0f;
-			float g = 1.0f;
-			float b = 1.0f;
+            // Color (RGB)
+            float r = 1.0f;
+            float g = 1.0f;
+            float b = 1.0f;
 
-			// Texture coordinates (UV)
-			float u = (float)lon / resolution;
-			float v = 1.0f - (float)lat / resolution;
+            // Texture coordinates (UV)
+            float u = (float)lon / resolution;
+            float v = 1.0f - (float)lat / resolution;
 
-			// Store 8 floats per vertex:
-			// x, y, z, r, g, b, u, v
-			vertices.insert(vertices.end(), {
-				x, y, z,
-				r, g, b,
-				u, v
-				});
-		}
-	}
+            // Store 8 floats per vertex:
+            // x, y, z, r, g, b, u, v
+            vertices.insert(vertices.end(), {
+                x, y, z,
+                r, g, b,
+                u, v
+                });
+        }
+    }
 
-	// Connect the vertices into triangles
-	for (int lat = 0; lat < resolution; lat++) {
-		for (int lon = 0; lon < resolution; lon++) {
-			GLuint first = lat * (resolution + 1) + lon;
-			GLuint second = first + resolution + 1;
+    // Connect the vertices into triangles
+    for (int lat = 0; lat < resolution; lat++) {
+        for (int lon = 0; lon < resolution; lon++) {
+            GLuint first = lat * (resolution + 1) + lon;
+            GLuint second = first + resolution + 1;
 
-			indices.insert(indices.end(), {
-				first, second, first + 1,
-				second, second + 1, first + 1
-				});
-		}
-	}
-}
+            indices.insert(indices.end(), {
+                first, second, first + 1,
+                second, second + 1, first + 1
+                });
+        }
+    }
+};
 
 
 void Model::init() {
@@ -167,8 +166,8 @@ void Model::init() {
 
     // Create the shader AFTER initializing the OpenGL context.
     ShaderProgram = std::make_unique<Shader>(
-        "default.vert.glsl",
-        "default.frag.glsl"
+        vertexShaderPath.c_str(),
+        fragmentShaderPath.c_str()
     );
 
     // Create and configure buffers.
@@ -286,6 +285,7 @@ void Model::init() {
     ShaderProgram->Activate();
 
     tex0Uni = glGetUniformLocation(ShaderProgram->ID, "tex0");
+    modelUni = glGetUniformLocation(ShaderProgram->ID, "model");
 
     if (tex0Uni >= 0) {
         glUniform1i(tex0Uni, 0);
@@ -307,7 +307,6 @@ void Model::render() {
     }
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     ShaderProgram->Activate();
@@ -325,6 +324,16 @@ void Model::render() {
         *ShaderProgram,
         "camMatrix"
     );
+
+    // NEW: Send the physics-based model transform to the GPU.
+    if (modelUni >= 0) {
+        glUniformMatrix4fv(
+            modelUni,
+            1,
+            GL_FALSE,
+            glm::value_ptr(ModelMatrix)
+        );
+    }
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);

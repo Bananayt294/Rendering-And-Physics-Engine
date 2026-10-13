@@ -14,8 +14,32 @@ PhysicsBody::PhysicsBody(float mass) {
 }
 
 void PhysicsBody::updateState(float deltaTime) {
-	pos = vel * deltaTime;
-	vel = acc * deltaTime;
+    if (deltaTime <= 0.0f) {
+        return;
+    }
 
+    // 1. Update linear velocity.
+    vel += acc * deltaTime;
 
+    // 2. Update position using the new velocity.
+    pos += vel * deltaTime;
+
+    // 3. Update angular velocity.
+    angVel += angAcc * deltaTime;
+
+    // 4. Integrate angular velocity into orientation.
+    float angularSpeed = glm::length(angVel);
+
+    if (angularSpeed > 1e-6f) {
+        glm::vec3 axis = angVel / angularSpeed;
+
+        glm::quat deltaRotation = glm::angleAxis(
+            angularSpeed * deltaTime,
+            axis
+        );
+
+        orientation = glm::normalize(
+            deltaRotation * orientation
+        );
+    }
 }
