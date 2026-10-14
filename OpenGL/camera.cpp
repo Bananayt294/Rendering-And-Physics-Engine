@@ -6,13 +6,27 @@ Camera::Camera(int width, int height, glm::vec3 position) {
 	this->Position = position;
 }
 
+void Camera::lookAt(const glm::vec3& target)
+{
+	Orientation = glm::normalize(target - Position);
+}
+
 void Camera::matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shader, const char* uniform) {
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
 	
 	view = glm::lookAt(this->Position, this->Position + this->Orientation, this->up);
 	projection = glm::perspective(glm::radians(FOVdeg), (float)width / (float)height, nearPlane, farPlane);
-
+	glm::mat4 camMatrix = projection * view;
+	GLint camLoc = glGetUniformLocation(shader.ID, uniform);
+	if (camLoc >= 0) {
+		glUniformMatrix4fv(camLoc, 1, GL_FALSE, glm::value_ptr(camMatrix));
+	}
+	GLint inverseLoc = glGetUniformLocation(shader.ID, "InverseCamMatrix");
+	if (inverseLoc >= 0) {
+		glm::mat4 inverseCamMatrix = glm::inverse(camMatrix);
+		glUniformMatrix4fv(inverseLoc, 1, GL_FALSE, glm::value_ptr(inverseCamMatrix));
+	}
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
 }
 
@@ -70,3 +84,7 @@ void Camera::Inputs(GLFWwindow* window) {
 			firstClick = false;
 		}
 	}
+
+glm::vec3 Camera::getPosition() const {
+	return Position;
+};

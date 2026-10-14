@@ -25,6 +25,8 @@ private:
 	std::unique_ptr<VAO> VAO1;
 	std::unique_ptr<VBO> VBO1;
 	std::unique_ptr<EBO> EBO1;
+	std::unique_ptr<Shader> gridShader;
+	GLuint gridVAO = 0;
 
 	GLuint texture = 0;
 	GLint tex0Uni = -1;

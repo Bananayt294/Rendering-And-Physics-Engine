@@ -295,23 +295,96 @@ void Model::init() {
     camera = std::make_unique<Camera>(
         width,
         height,
-        glm::vec3(0.0f, 0.0f, 5.0f)
+        glm::vec3(0.0f, 5.0f, 8.0f)
     );
+
+    camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    gridShader = std::make_unique<Shader>(
+        "infinite_grid.vert.glsl",
+        "infinite_grid.frag.glsl"
+    );
+    GLint linked = GL_FALSE;
+
+glGetProgramiv(gridShader->ID, GL_LINK_STATUS, &linked);
+
+if (linked != GL_TRUE) {
+    char log[2048] = {};
+
+    glGetProgramInfoLog(
+        gridShader->ID,
+        sizeof(log),
+        nullptr,
+        log
+    );
+
+    std::cerr << "GRID SHADER LINK FAILED:\n"
+              << log << '\n';
+}
+else {
+    std::cout << "Grid shader linked successfully. Program ID: "
+              << gridShader->ID << '\n';
+}
+    glGenVertexArrays(1, &gridVAO);
+
 }
 void Model::render() {
     if (window == nullptr ||
         !ShaderProgram ||
+        !gridShader ||
         !camera ||
-        !VAO1) {
+        !VAO1 ||
+        gridVAO == 0) {
         return;
     }
+
+    // Process camera input before drawing.
+    camera->Inputs(window);
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ShaderProgram->Activate();
+ 
 
-    camera->Inputs(window);
+    gridShader->Activate();
+
+    
+    camera->matrix(
+        45.0f,
+        0.1f,
+        100.0f,
+        *gridShader,
+        "gVP"
+    );
+
+    // Send the camera's world-space position.
+    GLint cameraPosLoc = glGetUniformLocation(
+        gridShader->ID,
+        "cameraPos"
+    );
+
+    if (cameraPosLoc >= 0) {
+        glm::vec3 cameraPos = camera->getPosition();
+
+        glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
+    }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBindVertexArray(gridVAO);
+
+    // The fullscreen triangle shader generates THREE vertices.
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glBindVertexArray(0);
+
+    glDisable(GL_BLEND);
+
+    // =========================
+    // 2. DRAW SPHERE
+    // =========================
+
+    ShaderProgram->Activate();
 
     if (tex0Uni >= 0) {
         glUniform1i(tex0Uni, 0);
@@ -325,7 +398,7 @@ void Model::render() {
         "camMatrix"
     );
 
-    // NEW: Send the physics-based model transform to the GPU.
+    // Send the model matrix.
     if (modelUni >= 0) {
         glUniformMatrix4fv(
             modelUni,

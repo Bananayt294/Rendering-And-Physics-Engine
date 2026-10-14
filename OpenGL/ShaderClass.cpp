@@ -3,18 +3,31 @@
 #include <sstream>
 #include <string> 
 
-std::string get_file_contents(const char* filename) {
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+
+std::string get_file_contents(const char* filename)
+{
 	std::ifstream in(filename, std::ios::binary);
-	if (in) {
-		std::string contents;
-		in.seekg(0, std::ios::end);
-		contents.resize(in.tellg());
-		in.seekg(0, std::ios::beg);
-		in.read(&contents[0], contents.size());
-		in.close();
-		return(contents);
+
+	if (!in.is_open()) {
+		throw std::runtime_error(
+			std::string("Failed to open shader file: ") + filename
+		);
 	}
-	throw(errno);
+
+	std::ostringstream contents;
+	contents << in.rdbuf();
+
+	if (in.bad()) {
+		throw std::runtime_error(
+			std::string("Failed to read shader file: ") + filename
+		);
+	}
+
+	return contents.str();
 }
 
 Shader::Shader(const char* vertexFile, const char* fragmentFile) {

@@ -165,6 +165,8 @@
   <ItemGroup>
     <None Include="default.frag.glsl" />
     <None Include="default.vert.glsl" />
+    <None Include="infinite_grid.frag.glsl" />
+    <None Include="infinite_grid.vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Body.h" />

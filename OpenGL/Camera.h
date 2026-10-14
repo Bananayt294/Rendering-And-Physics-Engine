@@ -8,6 +8,8 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include "Shaders.h"
+#include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class Camera {
 	public:
@@ -27,4 +29,6 @@ class Camera {
 
 		void matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shader, const char* uniform);
 		void Inputs(GLFWwindow* window);
+		glm::vec3 getPosition() const;
+		void lookAt(const glm::vec3& target);
 };
