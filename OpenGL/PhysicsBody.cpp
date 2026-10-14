@@ -43,3 +43,11 @@ void PhysicsBody::updateState(float deltaTime) {
         );
     }
 }
+
+void PhysicsBody::applyForce(glm::vec3 Force) {
+    this->acc += Force * this->mass_inv;
+};
+
+void PhysicsBody::applyTorque(glm::vec3 torque) {
+    this->angAcc += torque * this->inertia_inv;
+};

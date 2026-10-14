@@ -42,7 +42,6 @@ int main() {
     sphere.pos = glm::vec3(0.0f, 2.0f, 0.0f);
     sphere.vel = glm::vec3(0.5f, 0.0f, 0.0f);
     sphere.acc = glm::vec3(0.0f, 0.0f, 0.0f);
-
     sphere.angVel = glm::vec3(0.0f, 0.8f, 0.0f);
 
     // Initialize the OpenGL context and resources.
@@ -61,7 +60,7 @@ int main() {
         previousTime = currentTime;
 
         deltaTime = std::min(deltaTime, 0.05f);
-
+        sphere.applyTorque(glm::vec3 (0.0f,60.0f,10.0f));
         // Update physics before rendering.
         sphere.updateState(deltaTime);
 

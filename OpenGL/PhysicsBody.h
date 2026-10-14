@@ -17,4 +17,6 @@ public:
 	float mass_inv;
 	PhysicsBody(float mass);
 	void updateState(float deltaTime);
+	void applyForce(glm::vec3 Force);
+	void applyTorque(glm::vec3 Force);
 };
