@@ -53,8 +53,6 @@ void PhysicsBody::applyTorque(glm::vec3 torque) {
 };
 
 void PhysicsBody::applyForceOnKeyPress(GLFWwindow* window){
-    glm::vec3 currentAcc = this->acc;
-    glm::vec3 currentVelocity = this->vel;
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
         applyForce(glm::vec3(0.01, 0.0, 0.0));
     }
