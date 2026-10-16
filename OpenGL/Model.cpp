@@ -84,17 +84,17 @@ void Model::GenerateSphere(std::vector<GLfloat>& vertices, std::vector<GLuint>& 
         for (int lon = 0; lon <= resolution; lon++) {
             float theta = glm::two_pi<float>() * lon / resolution;
 
-            // Position
+            
             float x = radius * std::sin(phi) * std::cos(theta);
             float y = radius * std::cos(phi);
             float z = radius * std::sin(phi) * std::sin(theta);
 
-            // Color (RGB)
+           
             float r = 1.0f;
             float g = 1.0f;
             float b = 1.0f;
 
-            // Texture coordinates (UV)
+            // Texture 
             float u = (float)lon / resolution;
             float v = 1.0f - (float)lat / resolution;
 
@@ -164,7 +164,6 @@ void Model::init() {
     vertexCount = static_cast<int>(vertexData.size() / 8);
     indexCount = static_cast<int>(indexData.size());
 
-    // Create the shader AFTER initializing the OpenGL context.
     ShaderProgram = std::make_unique<Shader>(
         vertexShaderPath.c_str(),
         fragmentShaderPath.c_str()
@@ -184,26 +183,15 @@ void Model::init() {
         GetIndexDataSize()
     );
 
-    VAO1->LinkAttrib(
-        *VBO1, 0, 3, GL_FLOAT,
-        8 * sizeof(float), (void*)0
-    );
+    VAO1->LinkAttrib(*VBO1, 0, 3, GL_FLOAT,8 * sizeof(float), (void*)0);
 
-    VAO1->LinkAttrib(
-        *VBO1, 1, 3, GL_FLOAT,
-        8 * sizeof(float), (void*)(3 * sizeof(float))
-    );
+    VAO1->LinkAttrib(*VBO1, 1, 3, GL_FLOAT,8 * sizeof(float), (void*)(3 * sizeof(float)));
 
-    VAO1->LinkAttrib(
-        *VBO1, 2, 2, GL_FLOAT,
-        8 * sizeof(float), (void*)(6 * sizeof(float))
-    );
+    VAO1->LinkAttrib(*VBO1, 2, 2, GL_FLOAT,8 * sizeof(float), (void*)(6 * sizeof(float)));
 
     VAO1->unbind();
     VBO1->Unbind();
 
-    // Do not unbind EBO1 here.
-    // Its element-buffer binding belongs to VAO1.
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -338,7 +326,7 @@ void Model::render() {
         return;
     }
 
-    // Process camera input before drawing.
+    // Process camera input before drawing
     camera->Inputs(window);
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -357,7 +345,7 @@ void Model::render() {
         "gVP"
     );
 
-    // Send the camera's world-space position.
+    // Send the camera's world-space position
     GLint cameraPosLoc = glGetUniformLocation(
         gridShader->ID,
         "cameraPos"
@@ -373,16 +361,13 @@ void Model::render() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindVertexArray(gridVAO);
 
-    // The fullscreen triangle shader generates THREE vertices.
+    
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 
-    // =========================
-    // 2. DRAW SPHERE
-    // =========================
 
     ShaderProgram->Activate();
 
@@ -398,7 +383,7 @@ void Model::render() {
         "camMatrix"
     );
 
-    // Send the model matrix.
+    // Send the model matrix
     if (modelUni >= 0) {
         glUniformMatrix4fv(
             modelUni,

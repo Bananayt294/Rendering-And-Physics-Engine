@@ -60,7 +60,8 @@ int main() {
         previousTime = currentTime;
 
         deltaTime = std::min(deltaTime, 0.05f);
-        sphere.applyTorque(glm::vec3 (0.0f,60.0f,10.0f));
+        sphere.applyForceOnKeyPress(model.window);
+        sphere.applyTorqueOnKeyPress(model.window);
         // Update physics before rendering.
         sphere.updateState(deltaTime);
 

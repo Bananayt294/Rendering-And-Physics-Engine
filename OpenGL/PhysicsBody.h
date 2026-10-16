@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext/quaternion_float.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 class PhysicsBody {
 public:
@@ -19,4 +21,6 @@ public:
 	void updateState(float deltaTime);
 	void applyForce(glm::vec3 Force);
 	void applyTorque(glm::vec3 Force);
+	void applyForceOnKeyPress(GLFWwindow* window);
+	void applyTorqueOnKeyPress(GLFWwindow* window);
 };
