@@ -2,7 +2,6 @@
 #include <string>
 #include "PhysicsBody.h"
 #include "Model.h"
-
 class Body {
 public:
 
