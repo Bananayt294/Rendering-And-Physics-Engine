@@ -17,6 +17,7 @@
 #include "Body.h"
 #include <string>
 #include <algorithm>
+#include "BodySystem.h"
 const unsigned int width = 900;
 const unsigned int height = 900;
 
@@ -37,6 +38,8 @@ int main() {
     std::string name = "sphere";
     PhysicsBody sphere(2.0f);
     Body Sphere(name, &sphere, &model);
+    BodySystem Bodies;
+    Bodies.addBody(&Sphere);
 
     // Initial physics state.
     sphere.pos = glm::vec3(0.0f, 2.0f, 0.0f);
@@ -62,9 +65,10 @@ int main() {
         deltaTime = std::min(deltaTime, 0.05f);
         sphere.applyForceOnKeyPress(model.window);
         sphere.applyTorqueOnKeyPress(model.window);
-        // Update physics before rendering.
-        sphere.updateState(deltaTime);
-
+        //Update physics before rendering.
+        
+        //sphere.updateState(deltaTime);
+        Bodies.updateBodies(deltaTime);
         Sphere.renderModel();
     }
 

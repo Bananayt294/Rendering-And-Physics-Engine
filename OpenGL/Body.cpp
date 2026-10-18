@@ -11,6 +11,10 @@
 Body::Body(std::string name, PhysicsBody* PHbody, Model* model) :name{ name }, phBody{ PHbody }, model{ model } {};
 Body::~Body() = default;
 
+
+PhysicsBody* Body::GetPhBody() {
+	return this->phBody;
+};
 glm::vec3 Body::GetPhBodyPos() {
 	return this->phBody->pos;
 };
