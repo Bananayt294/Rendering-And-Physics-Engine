@@ -12,6 +12,10 @@ A lightweight C++ graphics and physics simulation project featuring a custom **O
 
 ---
 
+## Upcoming Features:
+ * Collision Detection
+ * Collision Reaction
+ * Rendering of Multiple Bodies
 ## 🎮 Controls
 
 ### Camera / General Navigation

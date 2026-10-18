@@ -11,6 +11,8 @@ public:
 	
 	void addBody(Body* body);
 	void updateBodies(float deltaTime);
+	void detectCollisions(float deltaTime);
+	void resolveCollisions(float deltaTime);
 	void renderBodies();
 	void destroyBodies();
 };
