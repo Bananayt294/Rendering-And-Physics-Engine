@@ -20,6 +20,7 @@ A lightweight C++ graphics and physics simulation project featuring a custom **O
 
 ### Camera / General Navigation
 * **`W` / `A` / `S` / `D`**: Generic movement controls.
+* **`Hold Down LMB and Move Mouse`**: Generic camera Controls controls.
 
 ### Sphere Force Controls (Linear Motion)
 * **`E` / `Q`**: Move along the X-axis (`+X` / `-X`)
