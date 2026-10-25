@@ -15,7 +15,7 @@ void BodySystem::updateBodies(float deltaTime) {
 		//Body->GetPhBody()->applyForce(glm::vec3(0.0f, -9.8f, 0.0f) * Body->GetPhBody()->mass);
 		Body->SetPhBodyPos(Body->GetPhBodyPos() + Body->GetPhBodyVel() * deltaTime);
 		Body->SetPhBodyVel(Body->GetPhBodyVel() + Body->GetPhBodyAcc() * deltaTime);
-
+		
 		Body->SetPhBodyAngVel(Body->GetPhBodyAngVel() + Body->GetPhBodyAngAcc()	 * deltaTime);
 
 		glm::quat deltaOrientation = 0.5f * Body->GetPhBodyOrientation() * deltaTime * glm::quat(0.0f, Body->GetPhBodyAngVel().x, Body->GetPhBodyAngVel().y, Body->GetPhBodyAngVel().z);
